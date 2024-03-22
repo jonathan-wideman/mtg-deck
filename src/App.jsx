@@ -35,6 +35,7 @@ function App() {
 
   const fetchDeck = (commanders, deck) => {
     setLibrary([]);
+    setCommandZone([]);
     setOtherZones([]);
 
     const request = async () => {
