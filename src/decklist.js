@@ -2,9 +2,12 @@ import { newId } from './rng';
 
 const parseCardTextLine = (line) => {
   const spaceIndex = line.indexOf(' ');
+  const count = parseInt(line.slice(0, spaceIndex));
+  const postSpace = line.slice(spaceIndex + 1);
+  const name = postSpace.match(/(.*) \/\/ .*/)?.[1] ?? postSpace;
   return {
-    count: parseInt(line.slice(0, spaceIndex)),
-    name: line.slice(spaceIndex + 1),
+    count,
+    name,
   };
 };
 
