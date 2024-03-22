@@ -26,13 +26,8 @@ export const parseDecklist = (text) => {
   return { commanders, deck };
 };
 
-export const requestDecklist = async (commanders, deck) => {
-  console.log('requesting deck', { commanders, deck });
-
-  let identifiers = [];
-
-  // scryfall api limits us to 75 cards at a time
-  identifiers = deck.slice(0, 75).map((card) => ({
+const requestCards = async (cards) => {
+  const identifiers = cards.map((card) => ({
     name: card.name,
   }));
 
@@ -40,49 +35,30 @@ export const requestDecklist = async (commanders, deck) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      // 'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: JSON.stringify({
       identifiers,
     }),
   }).then((response) => response.json());
 
-  // scryfall api limits requests to 1/100ms
-  await delay(150);
+  return result?.data ?? []
+}
 
-  identifiers = deck.slice(75).map((card) => ({
-    name: card.name,
-  }));
-  const result2 = await fetch('https://api.scryfall.com/cards/collection', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      // 'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: JSON.stringify({
-      identifiers,
-    }),
-  }).then((response) => response.json());
+export const requestDecklist = async (commanders, deck) => {
+  console.log('requesting deck', { commanders, deck });
+  
+  // scryfall api limits us to 75 cards at a time
+  const deckChunks = chunkArray(deck, 75);
 
-  const deckResults = [...(result?.data ?? []), ...(result2?.data ?? [])];
+  let deckResults = []
+  for (let i = 0; i < deckChunks.length; i++) {
+    const results = await requestCards(deckChunks[i]);
+    deckResults.push(...results)
+    // scryfall api limits requests to 1/100ms
+    await delay(150);
+  }
 
-  // scryfall api limits requests to 1/100ms
-  await delay(150);
-
-  identifiers = commanders.map((card) => ({
-    name: card.name,
-  }));
-  const result3 = await fetch('https://api.scryfall.com/cards/collection', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      // 'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: JSON.stringify({
-      identifiers,
-    }),
-  }).then((response) => response.json());
-  const commandResult = [...(result3?.data ?? [])];
+  const commandResult =  await requestCards(commanders);
 
   const deckCards = deck.flatMap((item, index) => {
     return createCards(deckResults[index], item.count)
@@ -95,11 +71,11 @@ export const requestDecklist = async (commanders, deck) => {
   return { deck: deckCards, commanders: commanderCards };
 };
 
-function createCards (scryfallCard, count) {
+const createCards = (scryfallCard, count) => {
   return [...new Array(count)].map((_) => createCard(scryfallCard))
 }
 
-function createCard (scryfallCard) {
+const createCard = (scryfallCard) => {
   return {
     id: newId(),
     name: scryfallCard.name,
@@ -110,10 +86,20 @@ function createCard (scryfallCard) {
   }
 }
 
-function delay(millisec) {
+const delay = (millisec) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve('');
     }, millisec);
   });
+}
+
+const chunkArray = (array, length) => {
+  const numChunks = Math.ceil(array.length / length)
+  let chunks = []
+  for (let i = 0; i < numChunks; i++) {
+    const offset = i * length
+    chunks.push(array.slice(offset, offset + length))    
+  }
+  return chunks
 }
