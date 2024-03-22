@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import './App.css';
-import { shuffle } from './rng';
-import { parseDecklist, requestDecklist } from './decklist';
-import Card from './Card';
-import Drawer from './Drawer';
+import { useState } from "react";
+import "./App.css";
+import { shuffle } from "./rng";
+import { parseDecklist, requestDecklist } from "./decklist";
+import Card from "./Card";
+import Drawer from "./Drawer";
 
 function App() {
-  const [decklistText, setDecklistText] = useState('');
+  const [decklistText, setDecklistText] = useState("");
 
   const [commandZone, setCommandZone] = useState([]);
   const [library, setLibrary] = useState([]);
@@ -59,7 +59,7 @@ function App() {
 
   return (
     <>
-      <Drawer label={'Decklist'} defaultOpen={true}>
+      <Drawer label={"Decklist"} defaultOpen={true}>
         {/* Moxfield had the quickest format to import */}
         <textarea
           value={decklistText}
