@@ -79,7 +79,7 @@ function App() {
               index={index}
               id={card.id}
               name={card.name}
-              img={card.image_uris.small}
+              img={card.faces[0].image_uris.small}
             />
           ))}
         </div>
@@ -99,7 +99,7 @@ function App() {
                 index={index}
                 id={card.id}
                 name={card.name}
-                img={card.image_uris.small}
+                img={card.faces[0].image_uris.small}
               />
             ))}
           </Drawer>
@@ -113,7 +113,7 @@ function App() {
               index={index}
               id={card.id}
               name={card.name}
-              img={card.image_uris.small}
+              img={card.faces[0].image_uris.small}
               onClick={() => {
                 replace(card);
               }}

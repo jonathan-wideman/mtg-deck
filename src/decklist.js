@@ -85,25 +85,30 @@ export const requestDecklist = async (commanders, deck) => {
   const commandResult = [...(result3?.data ?? [])];
 
   const deckCards = deck.flatMap((item, index) => {
-    const { name, image_uris } = deckResults[index];
-    return [...new Array(item.count)].map((_) => ({
-      id: newId(),
-      name,
-      image_uris,
-    }));
+    return createCards(deckResults[index], item.count)
   });
 
   const commanderCards = commanders.flatMap((item, index) => {
-    const { name, image_uris } = commandResult[index];
-    return [...new Array(item.count)].map((_) => ({
-      id: newId(),
-      name,
-      image_uris,
-    }));
+    return createCards(commandResult[index], item.count)
   });
 
   return { deck: deckCards, commanders: commanderCards };
 };
+
+function createCards (scryfallCard, count) {
+  return [...new Array(count)].map((_) => createCard(scryfallCard))
+}
+
+function createCard (scryfallCard) {
+  return {
+    id: newId(),
+    name: scryfallCard.name,
+    faces:
+      scryfallCard.card_faces ?
+        scryfallCard.card_faces.map(face => ({image_uris: face.image_uris})) :
+        [{image_uris: scryfallCard.image_uris}]
+  }
+}
 
 function delay(millisec) {
   return new Promise((resolve) => {
